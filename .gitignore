@@ -1,0 +1,24 @@
+# Secrets: never commit keys (rubric 5.3). Use Secret Manager in the cloud.
+.env
+*.env
+!.env.example
+
+# Local session/memory databases may contain test PII.
+.adk/
+*.db
+
+# Old prototype folder (contains a local session DB) - not part of the repo.
+qiddiya_concierge/
+
+# Python / tooling
+.venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+
+# Terraform state contains resource details; keep it out of git.
+terraform/.terraform/
+terraform/*.tfstate
+terraform/*.tfstate.*
+terraform/.terraform.lock.hcl
+terraform/terraform.tfvars

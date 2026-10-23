@@ -1,0 +1,4 @@
+# Agent dependencies. `adk deploy` installs this file inside the container.
+# [gcp] adds Vertex AI Agent Engine (Sessions + Memory Bank) and the
+# OpenTelemetry exporters for Cloud Trace / Cloud Logging.
+google-adk[gcp]==2.11.0

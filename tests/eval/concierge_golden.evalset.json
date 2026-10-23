@@ -1,0 +1,84 @@
+{
+  "eval_set_id": "concierge_golden",
+  "name": "Desert Peaks concierge golden set",
+  "description": "Golden routing + tool-use cases. Run: adk eval park_concierge tests/eval/concierge_golden.evalset.json --config_file_path tests/eval/test_config.json",
+  "eval_cases": [
+    {
+      "evalId": "thrill_rides",
+      "conversation": [
+        {
+          "invocationId": "thrill_rides-1",
+          "userContent": {"parts": [{"text": "What thrill rides do you have?"}], "role": "user"},
+          "finalResponse": {"parts": [{"text": "Sandstorm Coaster (minimum height 140 cm) and Mirage Drop Tower (minimum height 122 cm) are our thrill rides."}], "role": "model"},
+          "intermediateData": {
+            "toolUses": [{"args": {"category": "thrill"}, "name": "list_attractions_by_category"}],
+            "toolResponses": [],
+            "intermediateResponses": []
+          },
+          "creationTimestamp": 0.0
+        }
+      ],
+      "sessionInput": {"appName": "park_concierge", "userId": "eval_user", "state": {}},
+      "creationTimestamp": 0.0,
+      "finalSessionState": {}
+    },
+    {
+      "evalId": "sold_out",
+      "conversation": [
+        {
+          "invocationId": "sold_out-1",
+          "userContent": {"parts": [{"text": "Is Sandstorm Coaster available on 2026-10-23?"}], "role": "user"},
+          "finalResponse": {"parts": [{"text": "Sandstorm Coaster is fully booked on 2026-10-23, there are 0 slots left."}], "role": "model"},
+          "intermediateData": {
+            "toolUses": [{"args": {"attraction": "Sandstorm Coaster", "date": "2026-10-23"}, "name": "check_attraction_availability"}],
+            "toolResponses": [],
+            "intermediateResponses": []
+          },
+          "creationTimestamp": 0.0
+        }
+      ],
+      "sessionInput": {"appName": "park_concierge", "userId": "eval_user", "state": {}},
+      "creationTimestamp": 0.0,
+      "finalSessionState": {}
+    },
+    {
+      "evalId": "opening_hours",
+      "conversation": [
+        {
+          "invocationId": "opening_hours-1",
+          "userContent": {"parts": [{"text": "What are the opening hours?"}], "role": "user"},
+          "finalResponse": {"parts": [{"text": "Parks open 16:00-24:00 on weekdays and 12:00-24:00 on weekends."}], "role": "model"},
+          "intermediateData": {
+            "toolUses": [{"args": {"topic": "opening hours"}, "name": "get_park_policy"}],
+            "toolResponses": [],
+            "intermediateResponses": []
+          },
+          "creationTimestamp": 0.0
+        }
+      ],
+      "sessionInput": {"appName": "park_concierge", "userId": "eval_user", "state": {}},
+      "creationTimestamp": 0.0,
+      "finalSessionState": {}
+    },
+    {
+      "evalId": "wait_time",
+      "conversation": [
+        {
+          "invocationId": "wait_time-1",
+          "userContent": {"parts": [{"text": "How long is the wait for Mirage Drop Tower at 20:00?"}], "role": "user"},
+          "finalResponse": {"parts": [{"text": "The estimated wait for Mirage Drop Tower at 20:00 is 90 minutes because it is peak time."}], "role": "model"},
+          "intermediateData": {
+            "toolUses": [{"args": {"attraction": "Mirage Drop Tower", "hour": 20}, "name": "estimate_queue_wait_time"}],
+            "toolResponses": [],
+            "intermediateResponses": []
+          },
+          "creationTimestamp": 0.0
+        }
+      ],
+      "sessionInput": {"appName": "park_concierge", "userId": "eval_user", "state": {}},
+      "creationTimestamp": 0.0,
+      "finalSessionState": {}
+    }
+  ],
+  "creation_timestamp": 0.0
+}

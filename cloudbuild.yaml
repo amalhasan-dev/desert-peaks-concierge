@@ -1,0 +1,63 @@
+# CI/CD pipeline (rubric 5.1 + CI/CD): test -> eval gate -> deploy.
+# Trigger: Cloud Build trigger on push to `main` of the GitHub repo.
+#
+# Substitutions to set on the trigger:
+#   _AGENT_ENGINE_ID  output of scripts/create_agent_engine.py
+#   _REGION           default us-central1
+steps:
+  # 1) Deterministic unit tests: tools, PII redaction, guardrails, wiring.
+  - id: unit-tests
+    name: python:3.12-slim
+    entrypoint: bash
+    args:
+      - -c
+      - |
+        pip install -q -r requirements.txt
+        python -m unittest discover -s tests -t . -v
+
+  # 2) Eval gate: replay the golden dataset against Gemini on Vertex AI.
+  #    The build fails (and nothing is deployed) if quality regresses.
+  - id: eval-gate
+    name: python:3.12-slim
+    entrypoint: bash
+    env:
+      - GOOGLE_GENAI_USE_VERTEXAI=TRUE
+      - GOOGLE_CLOUD_PROJECT=$PROJECT_ID
+      - GOOGLE_CLOUD_LOCATION=$_REGION
+    args:
+      - -c
+      - |
+        pip install -q -r requirements.txt
+        adk eval park_concierge tests/eval/concierge_golden.evalset.json \
+          --config_file_path tests/eval/test_config.json --print_detailed_results
+
+  # 3) Deploy to Cloud Run with tracing, persistent sessions and Memory Bank.
+  - id: deploy
+    name: gcr.io/google.com/cloudsdktool/google-cloud-cli:stable
+    entrypoint: bash
+    args:
+      - -c
+      - |
+        apt-get update -qq && apt-get install -y -qq python3-venv > /dev/null
+        python3 -m venv /tmp/venv && . /tmp/venv/bin/activate
+        pip install -q -r requirements.txt
+        adk deploy cloud_run \
+          --project $PROJECT_ID --region $_REGION \
+          --service_name park-concierge --with_ui --trace_to_cloud \
+          --session_service_uri agentengine://$_AGENT_ENGINE_ID \
+          --memory_service_uri agentengine://$_AGENT_ENGINE_ID \
+          --env GOOGLE_GENAI_USE_VERTEXAI=TRUE \
+          --env GOOGLE_CLOUD_PROJECT=$PROJECT_ID \
+          --env GOOGLE_CLOUD_LOCATION=$_REGION \
+          --env ENABLE_CONTEXT_CACHE=true \
+          ./park_concierge \
+          -- --service-account=park-concierge-sa@$PROJECT_ID.iam.gserviceaccount.com \
+             --no-allow-unauthenticated
+
+substitutions:
+  _REGION: us-central1
+  _AGENT_ENGINE_ID: ""
+
+options:
+  logging: CLOUD_LOGGING_ONLY
+timeout: 1800s
